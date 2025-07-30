@@ -4,7 +4,7 @@ import gdown
 import time
 
 model_path = Path(__file__).parent.parent / "models" / "mistral-7b-instruct-v0.2.Q4_K_M.gguf"
-gdrive_url = "https://drive.google.com/uc?id=FILE_ID"
+gdrive_url = "https://drive.google.com/uc?id=<FILE_ID>"
 
 if not model_path.exists():
     print("📥 Downloading model...")
