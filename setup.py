@@ -1,4 +1,8 @@
 from setuptools import setup, find_packages
+from pathlib import Path
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="code-reviewer",
@@ -7,6 +11,8 @@ setup(
     author="Vatsalya Bajpai",
     author_email="vatsalyabajpai03@example.com",
     url="https://github.com/ChargedMonk/CodeReviewer",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=find_packages(),
     include_package_data=True,
     install_requires=["llama-cpp-python==0.3.8", "gdown==5.2.0"],
