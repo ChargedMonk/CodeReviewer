@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+# Ensure there are staged changes
+if git diff --cached --quiet; then
+  echo "🟡 No staged changes to review."
+  exit 0
+fi
+
+# Save the diff with context to a temp file
+PATCH_FILE="/tmp/ai_review_diff_$$.patch"
+LOG_FILE="/tmp/code_reviewer_$$.log"
+
+git diff --cached --unified=3 --diff-filter=ACM > "$PATCH_FILE"
+
+COMMIT_ID=$(git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M%S)
+
+ABS_LOG_FILE=$(realpath "$LOG_FILE" 2>/dev/null || echo "$LOG_FILE")
+
+# Run reviewer in background
+echo "📤 Running code reviewer in background... (log: $ABS_LOG_FILE)"
+
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$OSTYPE" == "cygwin" ]]; then
+  nohup code-reviewer --diff "$PATCH_FILE" "$COMMIT_ID" > "$LOG_FILE" 2>&1 &
+else
+  (code-reviewer --diff "$PATCH_FILE" "$COMMIT_ID" > "$LOG_FILE" 2>&1 &) &
+fi
+
+# Background a watcher to detect completion
+(
+  while sleep 5; do
+    if grep -q "REVIEW DONE" "$LOG_FILE"; then
+      echo "  ✅  Review completed!"
+      break
+    fi
+  done
+) &
