@@ -5,3 +5,5 @@ models/*.gguf
 .code_review
 *pycache*
 code_reviewer/__pycache__
+dist
+build

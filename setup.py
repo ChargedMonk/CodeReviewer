@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="code-reviewer",
-    version="0.1.0",
+    version="0.1.1",
     description="AI-based local code reviewer that runs on every git commit.",
     author="Vatsalya Bajpai",
     author_email="vatsalyabajpai03@example.com",
