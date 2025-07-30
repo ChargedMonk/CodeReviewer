@@ -3,14 +3,6 @@ from pathlib import Path
 import gdown
 import time
 
-model_path = Path(__file__).parent.parent / "models" / "mistral-7b-instruct-v0.2.Q4_K_M.gguf"
-gdrive_url = "https://drive.google.com/uc?id=<FILE_ID>"
-
-if not model_path.exists():
-    print("📥 Downloading model...")
-    gdown.download(gdrive_url, str(model_path), quiet=False)
-
-llm = Llama(model_path=str(model_path), n_ctx=16384//2, verbose=False)
 
 def parse_diff_file(diff_path: Path):
     file_diffs = {}
@@ -32,22 +24,36 @@ def parse_diff_file(diff_path: Path):
 
     return file_diffs
 
-def run_diff_review(diff_path: Path, commit_id: str):
+def run_diff_review(diff_path: Path, commit_id: str, config: dict):
     start_time = time.time()
+
+    model_dir = Path(config.get("model_dir"))
+    model_file = config.get("model_file")
+    model_path = model_dir / model_file
+
+    model_url = config.get("gdrive_model_url")
+
+    if not model_path.exists() and model_url:
+        print(f"📥 Downloading model: {model_url}")
+        gdown.download(model_url, str(model_path), quiet=False)
+
+    llm = Llama(model_path=str(model_path), n_ctx=config.get("text-context", 16384 // 2), verbose=False)
+
+
     file_diffs = parse_diff_file(diff_path)
     if not file_diffs:
         print("⚠️ No relevant changes found in diff.")
         return
 
-    review_dir = Path(".code_review")
+    review_dir = Path(config.get("review_dir"))
     review_dir.mkdir(exist_ok=True)
 
     for file, diff_chunk in file_diffs.items():
-        prompt = (f"You are a senior code reviewer. Given the diff and surrounding code context, suggest improvements in code quality, logic, and readability. "
-                  f"Be precise and constructive.\nFile: `{file}`\nDiff:\n```diff\n{diff_chunk}\n```")
+        prompt_prefix = config.get("prompt_prefix")
+        prompt = f"{prompt_prefix}\nFile: `{file}`\nDiff:\n```diff\n{diff_chunk}\n```"
         print(f"🧠 Reviewing {file}\nPrompt:\n{prompt}")
         try:
-            response = llm(prompt, max_tokens=1024)
+            response = llm(prompt, max_tokens=config.get("max_tokens", 1024))
             suggestion = response["choices"][0]["text"].strip()
 
             output_file = review_dir / f"{Path(file).name}_{commit_id}.review.txt"
@@ -57,5 +63,5 @@ def run_diff_review(diff_path: Path, commit_id: str):
         except Exception as e:
             print(f"❌ Error reviewing {file}: {e}")
 
-    print(f"✅ Review completed. See .code_review/ folder for suggestions.\n{round(time.time()-start_time)} sec")
+    print(f"✅ Review completed. See {review_dir} folder for suggestions.\n{round(time.time()-start_time)} sec")
     print("REVIEW DONE")

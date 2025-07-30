@@ -21,9 +21,9 @@ ABS_LOG_FILE=$(realpath "$LOG_FILE" 2>/dev/null || echo "$LOG_FILE")
 echo "📤 Running code reviewer in background... (log: $ABS_LOG_FILE)"
 
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$OSTYPE" == "cygwin" ]]; then
-  nohup code-reviewer --diff "$PATCH_FILE" "$COMMIT_ID" > "$LOG_FILE" 2>&1 &
+  nohup code-reviewer diff "$PATCH_FILE" "$COMMIT_ID" > "$LOG_FILE" 2>&1 &
 else
-  (code-reviewer --diff "$PATCH_FILE" "$COMMIT_ID" > "$LOG_FILE" 2>&1 &) &
+  (code-reviewer diff "$PATCH_FILE" "$COMMIT_ID" > "$LOG_FILE" 2>&1 &) &
 fi
 
 # Background a watcher to detect completion

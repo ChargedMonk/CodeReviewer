@@ -1,7 +1,7 @@
 # Include the pre-commit hook script
 include hooks/pre-commit
 
-# Include model instructions (if it's a text file)
+# Include model instructions
 recursive-include models *.txt
 
 # Include the setup shell script

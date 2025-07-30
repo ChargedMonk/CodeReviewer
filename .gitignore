@@ -4,3 +4,4 @@ models/*.gguf
 .idea
 .code_review
 *pycache*
+code_reviewer/__pycache__
