@@ -1,0 +1,6 @@
+models/*.gguf
+*.egg-info
+.venv
+.idea
+.code_review
+*pycache*
