@@ -8,15 +8,19 @@ import json
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-from code_reviewer.reviewer import run_diff_review
+from diff_reviewer.reviewer import run_diff_review
 
 
 
-CONFIG_DIR = Path.home() / ".code_reviewer"
+CONFIG_DIR = Path.home() / ".diff_reviewer"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
 def save_config(args):
     CONFIG_DIR.mkdir(exist_ok=True)
+    binary_path = shutil.which("diff-reviewer")
+    if binary_path:
+        binary_path = str(Path(binary_path).resolve())
+
     config = {
         "model_dir": str(args.model_dir),
         "model_file": str(args.model_file),
@@ -25,6 +29,7 @@ def save_config(args):
         "review_dir": str(args.review_dir),
         "prompt_prefix": args.prompt_prefix,
         "max_tokens": args.max_tokens,
+        "binary_path": binary_path,
     }
     CONFIG_FILE.write_text(json.dumps(config, indent=2))
     print(f"✅ Saved model configuration at {CONFIG_FILE}")
@@ -44,6 +49,7 @@ def load_config():
         "review_dir": Path(config_data["review_dir"]),
         "prompt_prefix": config_data["prompt_prefix"],
         "max_tokens": config_data["max_tokens"],
+        "binary_path": config_data["binary_path"]
     }
 
     print(f"✅ Loaded model configuration from {CONFIG_FILE}")
@@ -74,16 +80,16 @@ def init_global_hook(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Code Reviewer CLI")
+    parser = argparse.ArgumentParser(description="Diff Reviewer CLI")
     subparsers = parser.add_subparsers(dest="command")
 
     # init
     init = subparsers.add_parser("init")
     init.add_argument("--model-dir", type=str, help="Path to model directory", default=Path(__file__).parent.parent / "models")
     init.add_argument("--model-file", type=str, help="Model filename", default="mistral-7b-instruct-v0.2.Q4_K_M.gguf")
-    init.add_argument("--gdrive-model-url", type=str, help="Google drive model url", default="https://drive.google.com/file/d/1IVrCT8mzSNtfUJ5rTyDbLfcxbHzkcX2K/view")
+    init.add_argument("--gdrive-model-url", type=str, help="Google drive model url", default="https://drive.google.com/uc?id=1IVrCT8mzSNtfUJ5rTyDbLfcxbHzkcX2K")
     init.add_argument("--text-context", type=int, help=f"Model text context, default: {16384 // 2}", default=(16384 // 2))
-    init.add_argument("--review-dir", type=str, help="Directory where the review file will be saved", default=".code_review")
+    init.add_argument("--review-dir", type=str, help="Directory where the review file will be saved", default=".diff_review")
     init.add_argument("--prompt-prefix", type=str, help="Prompt prefix, default: You are a senior code reviewer. Given the diff and "
                                                         "surrounding code context, suggest improvements in code quality, logic, "
                                                         "and readability. Be precise and constructive.",

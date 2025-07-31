@@ -2,8 +2,8 @@ models/*.gguf
 *.egg-info
 .venv
 .idea
-.code_review
+.diff_review
 *pycache*
-code_reviewer/__pycache__
+diff_reviewer/__pycache__
 dist
 build

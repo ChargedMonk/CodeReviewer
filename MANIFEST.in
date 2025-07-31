@@ -8,7 +8,7 @@ recursive-include models *.txt
 include setup_global_hook.sh
 
 # Include all Python source files
-recursive-include code_reviewer *.py
+recursive-include diff_reviewer *.py
 
 # Include README, LICENSE, and other important files
 include README.md

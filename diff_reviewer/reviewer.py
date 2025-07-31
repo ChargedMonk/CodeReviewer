@@ -28,6 +28,7 @@ def run_diff_review(diff_path: Path, commit_id: str, config: dict):
     start_time = time.time()
 
     model_dir = Path(config.get("model_dir"))
+    model_dir.mkdir(parents=True, exist_ok=True)
     model_file = config.get("model_file")
     model_path = model_dir / model_file
 
